@@ -14,6 +14,18 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+    "paths": {
+      "@contexts": ["src/contexts"],
+      "@contexts/*": ["src/contexts/*"],
+      "@users": ["src/contexts/users"],
+      "@users/*": ["src/contexts/users/*"],
+      "@auth": ["src/contexts/auth"],
+      "@auth/*": ["src/contexts/auth/*"],
+      "@products": ["src/contexts/products"],
+      "@products/*": ["src/contexts/products/*"],
+      "@shared": ["src/contexts/shared"],
+      "@shared/*": ["src/contexts/shared/*"]
+    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
