@@ -1,4 +1,9 @@
-import { Global, Module } from '@nestjs/common';
+import {
+  Global,
+  MiddlewareConsumer,
+  Module,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { Controllers } from '@shared/infrastructure/ui/controllers';
@@ -7,14 +12,25 @@ import {
   EventHandlers,
   GatewayProviders,
   QueryHandlers,
+  SharedProviders,
   UseCaseProviders,
 } from './providers';
+import { envValidationSchema } from './config';
+import {
+  AsyncContextMiddleware,
+  RequestIdMiddleware,
+} from '@shared/infrastructure/driven-adapters/nestjs';
 
 @Global()
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      validationSchema: envValidationSchema,
+      validationOptions: {
+        abortEarly: false,
+        allowUnknown: true,
+      },
     }),
     CqrsModule,
   ],
@@ -22,10 +38,17 @@ import {
   providers: [
     ...UseCaseProviders,
     ...GatewayProviders,
+    ...SharedProviders,
     ...CommandHandlers,
     ...QueryHandlers,
     ...EventHandlers,
   ],
   exports: [ConfigModule, CqrsModule],
 })
-export class SharedModule {}
+export class SharedModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(RequestIdMiddleware, AsyncContextMiddleware)
+      .forRoutes({ path: '*path', method: RequestMethod.ALL });
+  }
+}

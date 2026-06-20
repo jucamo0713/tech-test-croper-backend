@@ -1,2 +1,2 @@
-export * from './application/shared.module';
+export * from './application';
 export * from './domain';

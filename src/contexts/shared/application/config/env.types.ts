@@ -1,0 +1,12 @@
+export type NodeEnvironment = 'development' | 'test' | 'production';
+
+export type LogLevel = 'error' | 'warn' | 'log' | 'debug' | 'verbose';
+
+export interface EnvironmentVariables {
+  NODE_ENV: NodeEnvironment;
+  PORT: number;
+  APP_NAME: string;
+  API_PREFIX: string;
+  LOG_LEVEL: LogLevel;
+  DEFAULT_TIMEOUT_MS: number;
+}

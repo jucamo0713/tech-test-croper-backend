@@ -43,7 +43,8 @@ The `SharedModule` is a global module responsible for common project-level impor
 
 In this iteration, `SharedModule` must centralize:
 
-- `ConfigModule`
+- `ConfigModule.forRoot`
+- Joi validation schema
 - `CqrsModule`
 - common shared providers
 
@@ -59,6 +60,53 @@ Do not configure in this iteration:
 - MongoDB driven adapters
 
 Mongoose and database configuration will be added later in a separate iteration.
+
+## Environment Variables
+
+The project uses `@nestjs/config` and `Joi` to validate environment variables at application startup.
+
+The configuration lives in:
+
+`src/contexts/shared/application/config`
+
+The `SharedModule` is responsible for loading and validating the global configuration.
+
+Current validated variables:
+
+- `NODE_ENV`
+- `PORT`
+- `APP_NAME`
+- `API_PREFIX`
+- `LOG_LEVEL`
+- `DEFAULT_TIMEOUT_MS`
+
+Runtime usage:
+
+- `PORT` is used by `src/main.ts` to choose the HTTP listen port.
+- `API_PREFIX` is used by `src/main.ts` as the global API prefix.
+- `LOG_LEVEL` is used by `src/main.ts` to configure Nest logger levels.
+- `APP_NAME` and `NODE_ENV` are used by `src/main.ts` in the startup log.
+- `DEFAULT_TIMEOUT_MS` is used by the global timeout interceptor when a handler does not define a custom timeout.
+
+Global shared infrastructure providers:
+
+- `AppLogger` is registered from `SharedModule` and used by `src/main.ts` as the Nest application logger.
+- `HttpExceptionFilter` is registered globally through `APP_FILTER`.
+- `LoggerInterceptor` is registered globally through `APP_INTERCEPTOR`.
+- `TimeoutInterceptor` is registered globally through `APP_INTERCEPTOR`.
+
+The validated defaults are:
+
+```txt
+NODE_ENV=development
+PORT=3000
+APP_NAME=nestjs-backend
+API_PREFIX=api
+LOG_LEVEL=log
+DEFAULT_TIMEOUT_MS=30000
+```
+
+Environment validation must stay centralized in `shared`; feature contexts must not import `ConfigModule` directly or duplicate environment schemas.
 
 ## Folder Structure
 
@@ -101,7 +149,11 @@ It may depend on `domain`, `infrastructure`, NestJS, and shared modules. No othe
 
 ## Domain Layer
 
-The domain layer contains the business core. It must remain independent from NestJS, infrastructure, application, controllers, handlers, and concrete adapters.
+The domain layer contains the business core. It must remain independent from infrastructure, application, controllers, handlers, and concrete adapters.
+
+NestJS dependencies are generally not allowed in domain code, with one explicit exception: domain models and use cases may use NestJS HTTP error classes for error handling, such as `HttpException`, `BadRequestException`, `NotFoundException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`, and `InternalServerErrorException`.
+
+Do not use NestJS decorators, modules, providers, dependency injection, `ConfigService`, buses, controllers, handlers, interceptors, filters, pipes, or concrete adapters from the domain layer.
 
 ## Domain Models
 
@@ -113,6 +165,8 @@ The domain layer contains the business core. It must remain independent from Nes
 - gateways
 
 Domain models should be as pure as possible.
+
+Domain models may throw NestJS HTTP errors when validation fails or when a domain invariant cannot be satisfied. They must not use other NestJS framework features.
 
 ## Domain CQRS inside Models
 
@@ -150,7 +204,25 @@ Use constants or symbols for injection tokens instead of loose strings when toke
 
 Use cases live in `domain/use-cases`. They contain business logic and may depend on domain models, value objects, commands, queries, events, and gateway interfaces.
 
-Use cases must not import NestJS, controllers, handlers, concrete adapters, application, infrastructure, or use cases from another context.
+Use cases must not import controllers, handlers, concrete adapters, application, infrastructure, or use cases from another context.
+
+Use cases may use NestJS HTTP errors for error handling only. They must not use other NestJS framework features.
+
+## Error Handling
+
+The project allows NestJS HTTP error classes for application and domain error handling.
+
+Allowed examples:
+
+```ts
+throw new BadRequestException('Invalid email');
+throw new NotFoundException('User not found');
+throw new ConflictException('Email already exists');
+```
+
+This exception is limited to error classes from `@nestjs/common`. It does not allow using NestJS dependency injection, modules, controllers, handlers, interceptors, pipes, filters, `ConfigService`, CQRS buses, or infrastructure dependencies inside domain code.
+
+Shared infrastructure may also use NestJS filters and interceptors to normalize and log errors globally.
 
 ## Infrastructure Layer
 
@@ -203,6 +275,8 @@ application -> infrastructure
 infrastructure -> domain
 domain -> no outer layer
 ```
+
+Exception: domain code may import NestJS HTTP error classes from `@nestjs/common` for error handling only.
 
 The application layer is the only place responsible for integrating providers, handlers, controllers, and adapters.
 
@@ -293,7 +367,7 @@ Controller -> Repository directly
 Controller -> Adapter directly
 Handler -> Repository concreto directamente
 Handler -> Adapter concreto directamente
-UseCase -> NestJS
+UseCase -> NestJS framework features, except HTTP error classes
 UseCase -> Controller
 UseCase -> Handler
 UseCase -> Adapter concreto
