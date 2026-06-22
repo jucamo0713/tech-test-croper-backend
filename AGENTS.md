@@ -41,25 +41,15 @@ Use aliases to keep imports readable, but do not use them to bypass cross-contex
 
 The `SharedModule` is a global module responsible for common project-level imports and providers.
 
-In this iteration, `SharedModule` must centralize:
+`SharedModule` must centralize:
 
 - `ConfigModule.forRoot`
 - Joi validation schema
 - `CqrsModule`
+- shared Mongo/Mongoose connection module
 - common shared providers
 
-The project will use Mongoose in a future iteration, but Mongoose must not be configured yet.
-
-Do not configure in this iteration:
-
-- `MongooseModule`
-- MongoDB connection
-- MongoDB environment variables
-- Mongoose schemas
-- MongoDB repositories
-- MongoDB driven adapters
-
-Mongoose and database configuration will be added later in a separate iteration.
+Context-specific Mongo/Mongoose models are infrastructure details. They must not be used directly by domain, controllers, handlers, or use cases.
 
 ## Environment Variables
 
@@ -267,6 +257,43 @@ Event handlers live in `infrastructure/ui/cqrs-handlers/event-handlers`. They re
 
 DTOs live in `infrastructure/dtos`. They can be used by controllers, handlers, and driven adapters, but must not replace domain entities or contain business logic.
 
+## Database Models
+
+Mongo/Mongoose models are infrastructure details.
+
+They live inside each context infrastructure layer.
+
+Users model files:
+
+- `src/contexts/users/infrastructure/database/user.model.ts`
+- `src/contexts/users/infrastructure/database/database-user-model.provider.ts`
+- `src/contexts/users/infrastructure/database/database-user-config.constants.ts`
+
+Products model files:
+
+- `src/contexts/products/infrastructure/database/product.model.ts`
+- `src/contexts/products/infrastructure/database/database-product-model.provider.ts`
+- `src/contexts/products/infrastructure/database/database-product-config.constants.ts`
+
+Persistence DTOs live in:
+
+- `src/contexts/users/infrastructure/dtos`
+- `src/contexts/products/infrastructure/dtos`
+
+Use cases, handlers and controllers must not use Mongoose models directly.
+
+Concrete database adapters or repositories are responsible for using these models.
+
+Model providers must register models against the shared Mongoose connection. They must not create new database connections.
+
+## Product Value Objects
+
+Product schemas must reuse the existing value objects or shared persistence structures for multilanguage fields and multi-price fields.
+
+Do not duplicate multilanguage or multi-price structures.
+
+Do not create new value object shapes if they already exist in the project.
+
 ## Dependency Rules
 
 Allowed direction:
@@ -298,11 +325,12 @@ Each context registers providers through:
 application/providers/
   use-case.providers.ts
   gateway.providers.ts
+  database.providers.ts
   handler.providers.ts
   index.ts
 ```
 
-Register use cases in `UseCaseProviders`, gateway token mappings in `GatewayProviders`, and CQRS handlers in `CommandHandlers`, `QueryHandlers`, and `EventHandlers`.
+Register use cases in `UseCaseProviders`, gateway token mappings in `GatewayProviders`, database model providers in `DatabaseProviders`, and CQRS handlers in `CommandHandlers`, `QueryHandlers`, and `EventHandlers`.
 
 ## Testing Architecture
 
@@ -367,14 +395,18 @@ If a file contains multiple classes, add a top-level describe for the group, the
 Controller -> UseCase directly
 Controller -> Repository directly
 Controller -> Adapter directly
+Controller -> Mongoose Model
 Handler -> Repository concreto directamente
 Handler -> Adapter concreto directamente
+Handler -> Mongoose Model
 UseCase -> NestJS framework features, except HTTP error classes
 UseCase -> Controller
 UseCase -> Handler
 UseCase -> Adapter concreto
 UseCase -> Application
 UseCase -> Infrastructure
+UseCase -> Mongoose Model
+Domain -> Mongoose
 Context A -> UseCase de Context B
 Context A -> Infrastructure de Context B
 Context A -> Application de Context B
@@ -382,12 +414,13 @@ DTO usado como entidad de dominio
 Gateway con implementación concreta dentro de domain/models/gateways
 Cada contexto importando ConfigModule directamente sin pasar por SharedModule
 Cada contexto importando CqrsModule directamente sin pasar por SharedModule
-Configurar MongoDB en esta iteración
-Configurar Mongoose en esta iteración
-Crear schemas de Mongoose en esta iteración
 Crear adapters de MongoDB en esta iteración
 Crear repositories concretos de MongoDB en esta iteración
-Agregar variables como MONGODB_URI todavía
+Duplicating existing multilanguage value objects
+Duplicating existing multi-price value objects
+Creating database connection inside model provider
+Creating repositories in this iteration
+Creating endpoints in this iteration
 Tests unitarios conectándose a bases de datos reales
 Tests sin estructura describe por clase y método
 Tests ubicados fuera de la estructura equivalente a src
