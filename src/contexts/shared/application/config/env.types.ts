@@ -9,4 +9,10 @@ export interface EnvironmentVariables {
   API_PREFIX: string;
   LOG_LEVEL: LogLevel;
   DEFAULT_TIMEOUT_MS: number;
+  MONGO_URI: string;
+  SWAGGER_ENABLED: boolean;
+  SWAGGER_PATH: string;
+  SWAGGER_TITLE: string;
+  SWAGGER_DESCRIPTION: string;
+  SWAGGER_VERSION: string;
 }

@@ -1,6 +1,7 @@
 import type { LogLevel as NestLogLevel } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import type { EnvironmentVariables } from '@shared/application/config';
 import { AppLogger } from '@shared/infrastructure/driven-adapters/nestjs';
 import { AppModule } from './app.module';
@@ -28,10 +29,32 @@ async function bootstrap() {
   const logLevel = configService.getOrThrow('LOG_LEVEL', { infer: true });
   const nodeEnv = configService.getOrThrow('NODE_ENV', { infer: true });
   const port = configService.getOrThrow('PORT', { infer: true });
+  const swaggerEnabled = configService.getOrThrow('SWAGGER_ENABLED', {
+    infer: true,
+  });
 
   appLogger.setLogLevels(LOG_LEVELS_BY_MIN_LEVEL[logLevel]);
   app.useLogger(appLogger);
   app.setGlobalPrefix(apiPrefix);
+
+  if (swaggerEnabled) {
+    const swaggerPath = configService.getOrThrow('SWAGGER_PATH', {
+      infer: true,
+    });
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle(configService.getOrThrow('SWAGGER_TITLE', { infer: true }))
+      .setDescription(
+        configService.getOrThrow('SWAGGER_DESCRIPTION', { infer: true }),
+      )
+      .setVersion(configService.getOrThrow('SWAGGER_VERSION', { infer: true }))
+      .addBearerAuth()
+      .build();
+    const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+
+    SwaggerModule.setup(swaggerPath, app, swaggerDocument, {
+      useGlobalPrefix: true,
+    });
+  }
 
   await app.listen(port);
 

@@ -1,3 +1,5 @@
 allowBuilds:
+  # Optional telemetry package; keep postinstall disabled.
+  '@scarf/scarf': false
   argon2: true
   unrs-resolver: true

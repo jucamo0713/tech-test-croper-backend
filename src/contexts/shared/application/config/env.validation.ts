@@ -10,4 +10,17 @@ export const envValidationSchema = Joi.object<EnvironmentVariables>({
     .valid('error', 'warn', 'log', 'debug', 'verbose')
     .required(),
   DEFAULT_TIMEOUT_MS: Joi.number().integer().min(1).max(300000).required(),
+  MONGO_URI: Joi.string()
+    .uri({
+      scheme: ['mongodb', 'mongodb+srv'],
+    })
+    .required(),
+  SWAGGER_ENABLED: Joi.boolean().required(),
+  SWAGGER_PATH: Joi.string()
+    .trim()
+    .pattern(/^[a-zA-Z0-9][a-zA-Z0-9/_-]*$/)
+    .required(),
+  SWAGGER_TITLE: Joi.string().trim().required(),
+  SWAGGER_DESCRIPTION: Joi.string().trim().required(),
+  SWAGGER_VERSION: Joi.string().trim().required(),
 });

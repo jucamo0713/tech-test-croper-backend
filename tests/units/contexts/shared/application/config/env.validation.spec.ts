@@ -7,6 +7,12 @@ const validEnvironmentVariables = {
   API_PREFIX: 'api/v1',
   LOG_LEVEL: 'debug',
   DEFAULT_TIMEOUT_MS: 15000,
+  MONGO_URI: 'mongodb://localhost:27017/croper-test',
+  SWAGGER_ENABLED: true,
+  SWAGGER_PATH: 'docs',
+  SWAGGER_TITLE: 'Croper API',
+  SWAGGER_DESCRIPTION: 'Croper backend API documentation',
+  SWAGGER_VERSION: '1.0.0',
 };
 
 describe('envValidationSchema', () => {
@@ -75,6 +81,26 @@ describe('envValidationSchema', () => {
 
       expect(error).toBeDefined();
       expect(error?.details[0].path).toEqual(['DEFAULT_TIMEOUT_MS']);
+    });
+
+    it('should reject invalid MONGO_URI', () => {
+      const { error } = envValidationSchema.validate({
+        ...validEnvironmentVariables,
+        MONGO_URI: 'not-a-mongo-uri',
+      });
+
+      expect(error).toBeDefined();
+      expect(error?.details[0].path).toEqual(['MONGO_URI']);
+    });
+
+    it('should reject invalid SWAGGER_PATH', () => {
+      const { error } = envValidationSchema.validate({
+        ...validEnvironmentVariables,
+        SWAGGER_PATH: '/docs',
+      });
+
+      expect(error).toBeDefined();
+      expect(error?.details[0].path).toEqual(['SWAGGER_PATH']);
     });
   });
 });

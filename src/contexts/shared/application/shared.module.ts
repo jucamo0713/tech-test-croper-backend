@@ -18,8 +18,9 @@ import {
 import { envValidationSchema } from './config';
 import {
   AsyncContextMiddleware,
+  DatabaseModule,
   RequestIdMiddleware,
-} from '@shared/infrastructure/driven-adapters/nestjs';
+} from '@shared/infrastructure/driven-adapters';
 
 @Global()
 @Module({
@@ -33,6 +34,7 @@ import {
       },
     }),
     CqrsModule,
+    DatabaseModule,
   ],
   controllers: [...Controllers],
   providers: [
@@ -43,7 +45,7 @@ import {
     ...QueryHandlers,
     ...EventHandlers,
   ],
-  exports: [ConfigModule, CqrsModule],
+  exports: [ConfigModule, CqrsModule, DatabaseModule],
 })
 export class SharedModule {
   configure(consumer: MiddlewareConsumer) {
