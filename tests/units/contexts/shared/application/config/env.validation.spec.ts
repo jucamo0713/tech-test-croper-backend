@@ -13,6 +13,10 @@ const validEnvironmentVariables = {
   SWAGGER_TITLE: 'Croper API',
   SWAGGER_DESCRIPTION: 'Croper backend API documentation',
   SWAGGER_VERSION: '1.0.0',
+  SESSION_TOKEN_SECRET: 'session-secret-minimum-32-characters',
+  SESSION_TOKEN_EXPIRES_IN_SECONDS: 900,
+  REFRESH_TOKEN_SECRET: 'refresh-secret-minimum-32-characters',
+  REFRESH_TOKEN_EXPIRES_IN_SECONDS: 604800,
 };
 
 describe('envValidationSchema', () => {
@@ -101,6 +105,26 @@ describe('envValidationSchema', () => {
 
       expect(error).toBeDefined();
       expect(error?.details[0].path).toEqual(['SWAGGER_PATH']);
+    });
+
+    it('should reject short session token secret', () => {
+      const { error } = envValidationSchema.validate({
+        ...validEnvironmentVariables,
+        SESSION_TOKEN_SECRET: 'short',
+      });
+
+      expect(error).toBeDefined();
+      expect(error?.details[0].path).toEqual(['SESSION_TOKEN_SECRET']);
+    });
+
+    it('should reject short refresh token secret', () => {
+      const { error } = envValidationSchema.validate({
+        ...validEnvironmentVariables,
+        REFRESH_TOKEN_SECRET: 'short',
+      });
+
+      expect(error).toBeDefined();
+      expect(error?.details[0].path).toEqual(['REFRESH_TOKEN_SECRET']);
     });
   });
 });

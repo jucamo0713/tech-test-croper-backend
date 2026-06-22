@@ -1,26 +1,24 @@
-import type {
-  Email,
-  IdValueObject,
-} from '@shared/domain/models/value-objects/string';
+import type { Email } from '@shared/domain/models/value-objects/string';
+import type { UserId } from '@users/domain/models/value-objects';
 
 export interface UserProps {
-  userId: IdValueObject;
+  userId: UserId;
   email: Email;
-  password: string;
+  passwordHash: string;
   status?: string;
 }
 
 export interface UserPrimitives {
   userId: string;
   email: string;
-  password: string;
+  passwordHash: string;
   status?: string;
 }
 
 export class User {
   constructor(private readonly props: UserProps) {}
 
-  public get id(): IdValueObject {
+  public get id(): UserId {
     return this.props.userId;
   }
 
@@ -28,8 +26,8 @@ export class User {
     return this.props.email;
   }
 
-  public get password(): string {
-    return this.props.password;
+  public get passwordHash(): string {
+    return this.props.passwordHash;
   }
 
   public get status(): string | undefined {
@@ -40,7 +38,7 @@ export class User {
     return {
       userId: this.props.userId.toString(),
       email: this.props.email.toString(),
-      password: this.props.password,
+      passwordHash: this.props.passwordHash,
       status: this.props.status,
     };
   }

@@ -15,4 +15,8 @@ export interface EnvironmentVariables {
   SWAGGER_TITLE: string;
   SWAGGER_DESCRIPTION: string;
   SWAGGER_VERSION: string;
+  SESSION_TOKEN_SECRET: string;
+  SESSION_TOKEN_EXPIRES_IN_SECONDS: number;
+  REFRESH_TOKEN_SECRET: string;
+  REFRESH_TOKEN_EXPIRES_IN_SECONDS: number;
 }

@@ -1,1 +1,3 @@
-export const Controllers = [];
+import { AuthController } from './auth.controller';
+
+export const Controllers = [AuthController];

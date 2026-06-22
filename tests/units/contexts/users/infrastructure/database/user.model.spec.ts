@@ -20,7 +20,9 @@ describe('UserSchema', () => {
 
       expect(getPathOptions('userId')).toMatchObject(fieldOptions.userId);
       expect(getPathOptions('email')).toMatchObject(fieldOptions.email);
-      expect(getPathOptions('password')).toMatchObject(fieldOptions.password);
+      expect(getPathOptions('passwordHash')).toMatchObject(
+        fieldOptions.passwordHash,
+      );
       expect(getPathOptions('status')).toMatchObject(fieldOptions.status);
     });
 

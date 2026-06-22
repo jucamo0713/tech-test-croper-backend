@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
+import { JwtModule } from '@nestjs/jwt';
 import { Controllers } from '@shared/infrastructure/ui/controllers';
 import {
   CommandHandlers,
@@ -19,10 +20,14 @@ import { envValidationSchema } from './config';
 import {
   AsyncContextMiddleware,
   DatabaseModule,
+  JwtTokenRepository,
   NestCqrsCaller,
   RequestIdMiddleware,
 } from '@shared/infrastructure/driven-adapters';
-import { CqrsCallerRepositoryToken } from '@shared/domain/models/gateways';
+import {
+  CqrsCallerRepositoryToken,
+  TokenRepositoryToken,
+} from '@shared/domain/models/gateways';
 
 @Global()
 @Module({
@@ -36,6 +41,7 @@ import { CqrsCallerRepositoryToken } from '@shared/domain/models/gateways';
       },
     }),
     CqrsModule,
+    JwtModule,
     DatabaseModule,
   ],
   controllers: [...Controllers],
@@ -53,6 +59,8 @@ import { CqrsCallerRepositoryToken } from '@shared/domain/models/gateways';
     DatabaseModule,
     NestCqrsCaller,
     CqrsCallerRepositoryToken,
+    JwtTokenRepository,
+    TokenRepositoryToken,
   ],
 })
 export class SharedModule {

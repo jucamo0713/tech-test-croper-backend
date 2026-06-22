@@ -11,7 +11,7 @@ export class UserMother {
     return {
       userId: new TestUserId('user-id'),
       email: new Email('user@test.com'),
-      password: 'hashed-password',
+      passwordHash: 'hashed-password',
       status: 'active',
     };
   }

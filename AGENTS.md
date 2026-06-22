@@ -342,6 +342,67 @@ Do not duplicate multilanguage or multi-price structures.
 
 Do not create new value object shapes if they already exist in the project.
 
+## CqrsCaller
+
+The project has one shared `CqrsCaller` implementation in `shared`.
+
+Controllers must use `CqrsCaller` to execute commands or queries.
+
+Controllers must not inject `CommandBus`, `QueryBus`, or `EventBus` directly.
+
+Adapters that need CQRS communication across contexts must use the shared `CqrsCaller` when CQRS is the chosen integration mechanism.
+
+Use cases must not depend on `CqrsCaller`.
+
+Use cases must depend on domain gateways.
+
+`CqrsCaller` centralizes CQRS execution and avoids duplicating transversal dispatch/query/event logic.
+
+## Auth Flows
+
+Register and login live as HTTP entry points in the `auth` context.
+
+`AuthController` uses `CqrsCaller`.
+
+`AuthController` must not use `CommandBus`, `QueryBus`, or `EventBus` directly.
+
+`RegisterCommand` and `LoginCommand` live in `auth/domain/models/cqrs/commands`.
+
+`RegisterCommandHandler` and `LoginCommandHandler` live in `auth/infrastructure/ui/cqrs-handlers/command-handlers`.
+
+`RegisterUseCase` and `LoginUseCase` live in `auth/domain/use-cases`.
+
+Auth communicates with users through a gateway defined in `auth/domain/models/gateways`.
+
+The gateway implementation lives in `auth/infrastructure/driven-adapters` and uses `CqrsCaller` to execute CQRS messages against users.
+
+Users exposes commands and queries to create and query users.
+
+Users handles user persistence through its own gateway and adapter.
+
+Password hashing and password comparison utilities live in shared and must be reused.
+
+Duplicating password hashing or password comparison logic is forbidden.
+
+Register must never persist plain text passwords. Users receives and persists `passwordHash`.
+
+Login must never return `passwordHash`.
+
+Register and login return both a session token and a refresh token.
+
+Tokens must be generated through the shared `TokenRepository`.
+
+Token secrets and expirations must come from validated environment variables:
+
+- `SESSION_TOKEN_SECRET`
+- `SESSION_TOKEN_EXPIRES_IN_SECONDS`
+- `REFRESH_TOKEN_SECRET`
+- `REFRESH_TOKEN_EXPIRES_IN_SECONDS`
+
+Do not hardcode token secrets or expirations.
+
+Session token validation is handled by the shared `JwtSessionGuard`.
+
 ## Dependency Rules
 
 Allowed direction:
@@ -444,7 +505,17 @@ Controller -> UseCase directly
 Controller -> Repository directly
 Controller -> Adapter directly
 Controller -> Mongoose Model
+Controller -> CommandBus directo
+Controller -> QueryBus directo
+Controller -> EventBus directo
+AuthController -> CommandBus directo
+AuthController -> QueryBus directo
+AuthController -> EventBus directo
+AuthController -> UserRepository
+AuthController -> Mongoose Model
+AuthController -> Users UseCase
 Handler -> Repository concreto directamente
+Handler -> Repository concreto
 Handler -> Adapter concreto directamente
 Handler -> Mongoose Model
 Entity -> Mongoose
@@ -463,6 +534,14 @@ UseCase -> Adapter concreto
 UseCase -> Application
 UseCase -> Infrastructure
 UseCase -> Mongoose Model
+Users UseCase -> Mongoose Model
+Auth UseCase -> Users Infrastructure
+Auth UseCase -> Users UseCase
+Auth UseCase -> Mongoose Model
+Auth UseCase -> CqrsCaller
+Auth UseCase -> CommandBus
+Auth UseCase -> QueryBus
+Auth UseCase -> EventBus
 Domain -> Mongoose
 Context A -> UseCase de Context B
 Context A -> Infrastructure de Context B
@@ -476,13 +555,17 @@ UserEntity
 ProductEntity
 UserEntityProps
 ProductEntityProps
-Crear adapters de MongoDB en esta iteración
-Crear repositories concretos de MongoDB en esta iteración
 Duplicating existing multilanguage value objects
 Duplicating existing multi-price value objects
 Creating database connection inside model provider
-Creating repositories in this iteration
-Creating endpoints in this iteration
+Duplicar CqrsCaller
+Crear otro CqrsCaller
+Duplicar hashing de password
+Duplicar comparación de password
+Guardar password plano
+Retornar passwordHash
+Hardcodear secretos
+Crear JWT sin configuración previa
 Tests unitarios conectándose a bases de datos reales
 Tests sin estructura describe por clase y método
 Tests ubicados fuera de la estructura equivalente a src

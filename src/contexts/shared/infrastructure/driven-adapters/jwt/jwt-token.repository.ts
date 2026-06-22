@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenRepository } from '@shared/domain/models/gateways/token.repository';
 import { PrimitiveObject } from '@shared/domain/models/types/primitive.type';
@@ -6,6 +7,7 @@ import { PrimitiveObject } from '@shared/domain/models/types/primitive.type';
  * Implementation of the `TokenRepository` interface using JWT (JSON Web Token).
  * This class provides methods to sign and verify JWT tokens.
  */
+@Injectable()
 export class JwtTokenRepository implements TokenRepository {
   /**
    * @param jwt - An instance of `JwtService` used to handle JWT operations such as signing and verification.

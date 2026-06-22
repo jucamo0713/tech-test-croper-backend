@@ -11,7 +11,7 @@ describe('User', () => {
       expect(user).toBeInstanceOf(User);
       expect(user.id).toBe(props.userId);
       expect(user.email).toBe(props.email);
-      expect(user.password).toBe(props.password);
+      expect(user.passwordHash).toBe(props.passwordHash);
       expect(user.status).toBe(props.status);
     });
   });
@@ -24,7 +24,7 @@ describe('User', () => {
       expect(user.toPrimitives()).toEqual({
         userId: props.userId.toString(),
         email: props.email.toString(),
-        password: props.password,
+        passwordHash: props.passwordHash,
         status: props.status,
       });
     });

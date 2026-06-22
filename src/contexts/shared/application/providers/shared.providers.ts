@@ -1,5 +1,9 @@
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-import { CqrsCallerRepositoryToken } from '@shared/domain/models/gateways';
+import {
+  CqrsCallerRepositoryToken,
+  TokenRepositoryToken,
+} from '@shared/domain/models/gateways';
+import { JwtTokenRepository } from '@shared/infrastructure/driven-adapters/jwt';
 import {
   AppLogger,
   HttpExceptionFilter,
@@ -11,9 +15,14 @@ import {
 export const SharedProviders = [
   AppLogger,
   NestCqrsCaller,
+  JwtTokenRepository,
   {
     provide: CqrsCallerRepositoryToken,
     useExisting: NestCqrsCaller,
+  },
+  {
+    provide: TokenRepositoryToken,
+    useExisting: JwtTokenRepository,
   },
   {
     provide: APP_FILTER,

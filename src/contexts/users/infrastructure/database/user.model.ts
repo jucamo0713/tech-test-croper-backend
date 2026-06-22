@@ -15,7 +15,7 @@ const definition: Required<SchemaDefinition<UserDto>> = {
     lowercase: true,
     trim: true,
   },
-  password: {
+  passwordHash: {
     type: String,
     required: true,
     select: false,

@@ -23,4 +23,8 @@ export const envValidationSchema = Joi.object<EnvironmentVariables>({
   SWAGGER_TITLE: Joi.string().trim().required(),
   SWAGGER_DESCRIPTION: Joi.string().trim().required(),
   SWAGGER_VERSION: Joi.string().trim().required(),
+  SESSION_TOKEN_SECRET: Joi.string().min(32).required(),
+  SESSION_TOKEN_EXPIRES_IN_SECONDS: Joi.number().integer().min(1).required(),
+  REFRESH_TOKEN_SECRET: Joi.string().min(32).required(),
+  REFRESH_TOKEN_EXPIRES_IN_SECONDS: Joi.number().integer().min(1).required(),
 });

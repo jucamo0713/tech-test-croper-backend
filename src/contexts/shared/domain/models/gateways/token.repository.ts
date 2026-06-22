@@ -1,5 +1,7 @@
 import { PrimitiveObject } from '@shared/domain/models/types';
 
+export const TokenRepositoryToken = Symbol('TokenRepository');
+
 /**
  * `TokenRepository` is an interface that defines methods for signing and verifying tokens.
  */
