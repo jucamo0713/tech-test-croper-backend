@@ -1,5 +1,6 @@
 import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { SwaggerEndpointDecorator } from '@shared/infrastructure/ui/controllers/swagger-endpoint.decorator';
 import { CqrsCallerRepositoryToken } from '@shared/domain/models/gateways';
 import type { CqrsCallerRepository } from '@shared/domain/models/gateways';
 import {
@@ -21,6 +22,17 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @SwaggerEndpointDecorator({
+    summary: 'Register a new user',
+    description: 'Register a new user',
+    response: {
+      status: 201,
+      description: 'User registered successfully',
+      type: AuthResponseDto,
+    },
+    errors: ['Bad request'],
+    requireAuth: false,
+  })
   register(@Body() body: RegisterRequestDto): Promise<AuthResponseDto> {
     return this.cqrsCaller.dispatch(
       new RegisterCommand(body.email, body.password),
@@ -32,6 +44,17 @@ export class AuthController {
   }
 
   @Post('login')
+  @SwaggerEndpointDecorator({
+    summary: 'Login a user',
+    description: 'Login a user',
+    response: {
+      status: 200,
+      description: 'User logged in successfully',
+      type: AuthResponseDto,
+    },
+    errors: ['Invalid credentials'],
+    requireAuth: false,
+  })
   login(@Body() body: LoginRequestDto): Promise<AuthResponseDto> {
     return this.cqrsCaller.dispatch(
       new LoginCommand(body.email, body.password),

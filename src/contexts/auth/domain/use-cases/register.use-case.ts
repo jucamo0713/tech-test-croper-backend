@@ -1,8 +1,12 @@
 import { CryptoUtils } from '@shared/domain/use-cases/utils';
 import { TokenRepository } from '@shared/domain/models/gateways';
-import { AuthResponse } from '@auth/domain/models/cqrs/commands';
 import { UsersAuthGateway } from '@auth/domain/models/gateways';
-import { AuthTokenConfig } from '@auth/domain/use-cases';
+import {
+  AuthSession,
+  AuthUser,
+  type AuthSessionPrimitives,
+} from '@auth/domain/models/entities';
+import { AuthTokenConfig } from '@auth/domain';
 
 export interface RegisterUseCaseParams {
   email: string;
@@ -16,34 +20,32 @@ export class RegisterUseCase {
     private readonly tokenConfig: AuthTokenConfig,
   ) {}
 
-  async execute(params: RegisterUseCaseParams): Promise<AuthResponse> {
+  async execute(params: RegisterUseCaseParams): Promise<AuthSessionPrimitives> {
     const passwordHash = await CryptoUtils.strongHash(params.password);
 
-    const response = await this.usersAuthGateway.createUser({
+    const user = await this.usersAuthGateway.createUser({
       email: params.email,
       passwordHash,
     });
 
-    return {
-      ...response,
-      ...this.createTokens(response.user),
-    };
+    return this.createSession(user).toPrimitives();
   }
 
-  private createTokens(
-    user: AuthResponse['user'],
-  ): Pick<AuthResponse, 'sessionToken' | 'refreshToken'> {
-    return {
+  private createSession(user: AuthUser): AuthSession {
+    const tokenPayload = user.toPrimitives();
+
+    return new AuthSession({
+      user,
       sessionToken: this.tokenRepository.sign(
-        user,
+        tokenPayload,
         this.tokenConfig.sessionSecret,
         this.tokenConfig.sessionExpiresIn,
       ),
       refreshToken: this.tokenRepository.sign(
-        user,
+        tokenPayload,
         this.tokenConfig.refreshSecret,
         this.tokenConfig.refreshExpiresIn,
       ),
-    };
+    });
   }
 }

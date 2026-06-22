@@ -1,9 +1,12 @@
 import {
-  AuthResponse,
-  AuthUserOnlyResponse,
   LoginCommand,
   RegisterCommand,
 } from '@auth/domain/models/cqrs/commands';
+import {
+  AuthSessionPrimitives,
+  AuthUser,
+  AuthUserPrimitives,
+} from '@auth/domain/models/entities';
 import {
   UserForAuthentication,
   UsersAuthGateway,
@@ -24,7 +27,7 @@ export class AuthUseCasesMother {
     return 'hashed-password';
   }
 
-  static authResponse(): AuthResponse {
+  static authResponse(): AuthSessionPrimitives {
     return {
       user: {
         userId: 'user-id',
@@ -36,10 +39,12 @@ export class AuthUseCasesMother {
     };
   }
 
-  static authResponseWithoutTokens(): AuthUserOnlyResponse {
-    return {
-      user: AuthUseCasesMother.authResponse().user,
-    };
+  static authUserPrimitives(): AuthUserPrimitives {
+    return AuthUseCasesMother.authResponse().user;
+  }
+
+  static authUser(): AuthUser {
+    return new AuthUser(AuthUseCasesMother.authUserPrimitives());
   }
 
   static sessionToken(): string {

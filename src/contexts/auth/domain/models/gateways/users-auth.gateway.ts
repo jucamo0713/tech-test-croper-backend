@@ -1,7 +1,4 @@
-import {
-  AuthUserOnlyResponse,
-  AuthUserResponse,
-} from '@auth/domain/models/cqrs/commands';
+import { AuthUser } from '@auth/domain/models/entities';
 
 export const UsersAuthGatewayToken = Symbol('UsersAuthGateway');
 
@@ -16,14 +13,6 @@ export interface UsersAuthGateway {
   createUser(params: {
     email: string;
     passwordHash: string;
-  }): Promise<AuthUserOnlyResponse>;
+  }): Promise<AuthUser>;
   findUserByEmail(email: string): Promise<UserForAuthentication | null>;
 }
-
-export const toAuthUserResponse = (
-  user: UserForAuthentication | AuthUserResponse,
-): AuthUserResponse => ({
-  userId: user.userId,
-  email: user.email,
-  status: user.status,
-});

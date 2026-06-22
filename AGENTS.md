@@ -285,7 +285,7 @@ The UI layer lives in `infrastructure/ui` and contains controllers plus CQRS han
 
 ## Controllers
 
-Controllers live in `infrastructure/ui/controllers`. Controllers only receive requests, validate or map DTOs, create commands or queries, execute them through `CommandBus` or `QueryBus`, and return responses.
+Controllers live in `infrastructure/ui/controllers`. Controllers only receive requests, validate or map DTOs, create commands or queries, execute them through the shared `CqrsCaller`, and return responses.
 
 Controllers must not call use cases, repositories, or adapters directly.
 
@@ -403,6 +403,68 @@ Do not hardcode token secrets or expirations.
 
 Session token validation is handled by the shared `JwtSessionGuard`.
 
+## Products CRUD
+
+The products context exposes a complete CRUD through `ProductsController`.
+
+`ProductsController` lives in:
+
+`src/contexts/products/infrastructure/ui/controllers/products.controller.ts`
+
+`ProductsController` must use the shared `CqrsCaller` to execute commands and queries.
+
+`ProductsController` must not inject or use `CommandBus`, `QueryBus`, or `EventBus` directly.
+
+Product CRUD endpoints must include:
+
+- create product
+- find product by id
+- paginated product search with filters
+- update product
+- delete product
+
+Product commands live in:
+
+`src/contexts/products/domain/models/cqrs/commands`
+
+Product queries live in:
+
+`src/contexts/products/domain/models/cqrs/queries`
+
+Product handlers live in:
+
+`src/contexts/products/infrastructure/ui/cqrs-handlers`
+
+Product use cases live in:
+
+`src/contexts/products/domain/use-cases`
+
+The product persistence gateway contract lives in:
+
+`src/contexts/products/domain/models/gateways/product-repository.gateway.ts`
+
+The product persistence adapter lives in:
+
+`src/contexts/products/infrastructure/driven-adapters/product-repository.adapter.ts`
+
+Product request and response DTOs live in:
+
+`src/contexts/products/infrastructure/dtos`
+
+Controllers must not contain business logic. Handlers must not contain business logic. Product use cases must not depend on Mongoose, infrastructure DTOs, controllers, handlers, or concrete adapters.
+
+Only concrete product adapters should use product Mongoose models.
+
+Paginated product search must accept filters and must enforce a maximum limit.
+
+Domain pagination criteria must not use Mongoose types such as `FilterQuery`, `Model`, or hydrated documents.
+
+Product multilanguage fields must reuse the existing shared multilanguage value object/type structures.
+
+Product price fields must reuse the existing shared multi-price or price map value object/type structures.
+
+CRUD responses must not return Mongoose documents, hydrated documents, `__v`, or internal persistence metadata directly.
+
 ## Dependency Rules
 
 Allowed direction:
@@ -514,10 +576,16 @@ AuthController -> EventBus directo
 AuthController -> UserRepository
 AuthController -> Mongoose Model
 AuthController -> Users UseCase
+ProductsController -> CommandBus directo
+ProductsController -> QueryBus directo
+ProductsController -> EventBus directo
+ProductsController -> ProductRepository
+ProductsController -> Mongoose Model
 Handler -> Repository concreto directamente
 Handler -> Repository concreto
 Handler -> Adapter concreto directamente
 Handler -> Mongoose Model
+Handler -> ProductRepositoryAdapter
 Entity -> Mongoose
 Entity -> NestJS
 Entity -> Infrastructure DTO
@@ -535,6 +603,9 @@ UseCase -> Application
 UseCase -> Infrastructure
 UseCase -> Mongoose Model
 Users UseCase -> Mongoose Model
+Product UseCase -> Mongoose Model
+Product UseCase -> ProductRepositoryAdapter
+Product UseCase -> ProductDto de infrastructure si no es necesario
 Auth UseCase -> Users Infrastructure
 Auth UseCase -> Users UseCase
 Auth UseCase -> Mongoose Model
@@ -557,6 +628,8 @@ UserEntityProps
 ProductEntityProps
 Duplicating existing multilanguage value objects
 Duplicating existing multi-price value objects
+Duplicar value objects multilenguaje
+Duplicar value objects de multiPrice
 Creating database connection inside model provider
 Duplicar CqrsCaller
 Crear otro CqrsCaller
@@ -566,6 +639,10 @@ Guardar password plano
 Retornar passwordHash
 Hardcodear secretos
 Crear JWT sin configuración previa
+Retornar HydratedDocument desde controller
+Retornar documentos de Mongoose directamente
+Paginación sin límite máximo
+Filtros acoplados directamente a Mongoose desde domain
 Tests unitarios conectándose a bases de datos reales
 Tests sin estructura describe por clase y método
 Tests ubicados fuera de la estructura equivalente a src

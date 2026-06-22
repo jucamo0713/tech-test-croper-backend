@@ -1,14 +1,14 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { TokenRepository } from '@shared/domain/models/gateways';
 import { CryptoUtils } from '@shared/domain/use-cases/utils';
-import { AuthResponse } from '@auth/domain/models/cqrs/commands';
+import { UsersAuthGateway } from '@auth/domain/models/gateways';
 import {
-  toAuthUserResponse,
-  UsersAuthGateway,
-} from '@auth/domain/models/gateways';
-import { AuthTokenConfig } from '@auth/domain/use-cases';
-
-const INVALID_CREDENTIALS_MESSAGE = 'Invalid credentials';
+  AuthSession,
+  AuthUser,
+  type AuthSessionPrimitives,
+} from '@auth/domain/models/entities';
+import { AuthTokenConfig } from '@auth/domain';
+import { AuthErrorMessagesConstants } from '@auth/domain/models/constants';
 
 export interface LoginUseCaseParams {
   email: string;
@@ -22,11 +22,13 @@ export class LoginUseCase {
     private readonly tokenConfig: AuthTokenConfig,
   ) {}
 
-  async execute(params: LoginUseCaseParams): Promise<AuthResponse> {
+  async execute(params: LoginUseCaseParams): Promise<AuthSessionPrimitives> {
     const user = await this.usersAuthGateway.findUserByEmail(params.email);
 
     if (!user) {
-      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
+      throw new UnauthorizedException(
+        AuthErrorMessagesConstants.INVALID_CREDENTIALS,
+      );
     }
 
     const isValidPassword = await CryptoUtils.compareStrongHash(
@@ -35,23 +37,35 @@ export class LoginUseCase {
     );
 
     if (!isValidPassword) {
-      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
+      throw new UnauthorizedException(
+        AuthErrorMessagesConstants.INVALID_CREDENTIALS,
+      );
     }
 
-    const authUser = toAuthUserResponse(user);
+    const authUser = new AuthUser({
+      userId: user.userId,
+      email: user.email,
+      status: user.status,
+    });
 
-    return {
-      user: authUser,
+    return this.createSession(authUser).toPrimitives();
+  }
+
+  private createSession(user: AuthUser): AuthSession {
+    const tokenPayload = user.toPrimitives();
+
+    return new AuthSession({
+      user,
       sessionToken: this.tokenRepository.sign(
-        authUser,
+        tokenPayload,
         this.tokenConfig.sessionSecret,
         this.tokenConfig.sessionExpiresIn,
       ),
       refreshToken: this.tokenRepository.sign(
-        authUser,
+        tokenPayload,
         this.tokenConfig.refreshSecret,
         this.tokenConfig.refreshExpiresIn,
       ),
-    };
+    });
   }
 }

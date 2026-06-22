@@ -1,21 +1,7 @@
 import { Command } from '@nestjs/cqrs';
+import type { AuthSessionPrimitives } from '@auth/domain/models/entities';
 
-export interface AuthUserResponse {
-  userId: string;
-  email: string;
-  status?: string;
-}
-
-export interface AuthUserOnlyResponse {
-  user: AuthUserResponse;
-}
-
-export interface AuthResponse extends AuthUserOnlyResponse {
-  sessionToken: string;
-  refreshToken: string;
-}
-
-export class RegisterCommand extends Command<AuthResponse> {
+export class RegisterCommand extends Command<AuthSessionPrimitives> {
   constructor(
     public readonly email: string,
     public readonly password: string,

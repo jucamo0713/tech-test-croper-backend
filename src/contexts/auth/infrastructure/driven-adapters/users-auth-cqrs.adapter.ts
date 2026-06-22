@@ -1,9 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CqrsCallerRepositoryToken } from '@shared/domain/models/gateways';
 import type { CqrsCallerRepository } from '@shared/domain/models/gateways';
-import { AuthUserOnlyResponse } from '@auth/domain/models/cqrs/commands';
+import { AuthUser } from '@auth/domain/models/entities';
 import {
-  toAuthUserResponse,
   UserForAuthentication,
   UsersAuthGateway,
 } from '@auth/domain/models/gateways';
@@ -20,7 +19,7 @@ export class UsersAuthCqrsAdapter implements UsersAuthGateway {
   async createUser(params: {
     email: string;
     passwordHash: string;
-  }): Promise<AuthUserOnlyResponse> {
+  }): Promise<AuthUser> {
     const user = await this.cqrsCaller.dispatch(
       new CreateUserCommand(params.email, params.passwordHash),
       {
@@ -29,9 +28,11 @@ export class UsersAuthCqrsAdapter implements UsersAuthGateway {
       },
     );
 
-    return {
-      user: toAuthUserResponse(user),
-    };
+    return new AuthUser({
+      userId: user.userId,
+      email: user.email,
+      status: user.status,
+    });
   }
 
   findUserByEmail(email: string): Promise<UserForAuthentication | null> {

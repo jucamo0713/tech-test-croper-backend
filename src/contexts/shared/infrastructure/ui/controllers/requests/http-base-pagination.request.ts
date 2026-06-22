@@ -1,15 +1,17 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsNumber, IsPositive } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsInt, IsNumber, IsOptional, IsPositive } from 'class-validator';
 import { Type } from 'class-transformer';
 import { SharedControllersSwaggerConstants } from '@shared/infrastructure/ui/controllers/constants/controllers.swagger.constants';
-import { SharedErrorMessagesConstants } from '@shared/domain/models/constants/shared-error-messages.constants';
+import { SharedErrorMessagesConstants } from '@shared/domain/models/constants';
 
 /**
  * Base class for HTTP pagination requests.
  */
 export class HttpBasePaginationRequest {
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: SharedControllersSwaggerConstants.PAGE_PARAM_DESCRIPTION,
+    minimum: 1,
+    type: Number,
   })
   @IsPositive({
     message: SharedErrorMessagesConstants.PAGE_MUST_BE_POSITIVE,
@@ -26,14 +28,14 @@ export class HttpBasePaginationRequest {
       message: SharedErrorMessagesConstants.PAGE_MUST_BE_NUMBER,
     },
   )
-  @IsNotEmpty({
-    message: SharedErrorMessagesConstants.PAGE_MUST_NOT_BE_EMPTY,
-  })
+  @IsOptional()
   @Type(() => Number)
-  page!: number;
+  page?: number;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: SharedControllersSwaggerConstants.LIMIT_PARAM_DESCRIPTION,
+    minimum: 1,
+    type: Number,
   })
   @IsPositive({
     message: SharedErrorMessagesConstants.LIMIT_MUST_BE_POSITIVE,
@@ -50,9 +52,7 @@ export class HttpBasePaginationRequest {
       message: SharedErrorMessagesConstants.LIMIT_MUST_BE_NUMBER,
     },
   )
-  @IsNotEmpty({
-    message: SharedErrorMessagesConstants.LIMIT_MUST_NOT_BE_EMPTY,
-  })
+  @IsOptional()
   @Type(() => Number)
-  limit!: number;
+  limit?: number;
 }

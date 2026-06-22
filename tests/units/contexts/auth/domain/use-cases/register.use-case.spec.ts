@@ -7,13 +7,13 @@ describe('RegisterUseCase', () => {
   describe('execute', () => {
     it('should hash the password, call users gateway and return a safe response', async () => {
       const usersAuthGateway = AuthUseCasesMother.usersAuthGateway();
-      const response = AuthUseCasesMother.authResponseWithoutTokens();
+      const authUser = AuthUseCasesMother.authUser();
       const tokenRepository = AuthUseCasesMother.tokenRepository();
       const passwordHash = AuthUseCasesMother.passwordHash();
       const strongHashSpy = jest
         .spyOn(CryptoUtils, 'strongHash')
         .mockResolvedValue(passwordHash);
-      usersAuthGateway.createUser.mockResolvedValue(response);
+      usersAuthGateway.createUser.mockResolvedValue(authUser);
       const useCase = new RegisterUseCase(
         usersAuthGateway,
         tokenRepository,

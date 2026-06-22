@@ -26,7 +26,9 @@ describe('UsersAuthCqrsAdapter', () => {
           showResult: false,
         },
       );
-      expect(result).toEqual(AuthUseCasesMother.authResponseWithoutTokens());
+      expect(result.toPrimitives()).toEqual(
+        AuthUseCasesMother.authUserPrimitives(),
+      );
     });
   });
 
