@@ -1,5 +1,6 @@
 import {
   LoginCommand,
+  RefreshTokenCommand,
   RegisterCommand,
 } from '@auth/domain/models/cqrs/commands';
 import {
@@ -70,7 +71,9 @@ export class AuthUseCasesMother {
         .fn()
         .mockReturnValueOnce(AuthUseCasesMother.sessionToken())
         .mockReturnValueOnce(AuthUseCasesMother.refreshToken()),
-      verify: jest.fn(),
+      verify: jest
+        .fn()
+        .mockReturnValue(AuthUseCasesMother.authUserPrimitives()),
     };
   }
 
@@ -93,6 +96,10 @@ export class AuthUseCasesMother {
       AuthUseCasesMother.email(),
       AuthUseCasesMother.password(),
     );
+  }
+
+  static refreshTokenCommand(): RefreshTokenCommand {
+    return new RefreshTokenCommand(AuthUseCasesMother.refreshToken());
   }
 
   static usersAuthGateway(): jest.Mocked<UsersAuthGateway> {

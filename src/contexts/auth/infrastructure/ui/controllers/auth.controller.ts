@@ -5,11 +5,13 @@ import { CqrsCallerRepositoryToken } from '@shared/domain/models/gateways';
 import type { CqrsCallerRepository } from '@shared/domain/models/gateways';
 import {
   LoginCommand,
+  RefreshTokenCommand,
   RegisterCommand,
 } from '@auth/domain/models/cqrs/commands';
 import {
   AuthResponseDto,
   LoginRequestDto,
+  RefreshTokenRequestDto,
   RegisterRequestDto,
 } from '@auth/infrastructure/dtos';
 
@@ -58,6 +60,28 @@ export class AuthController {
   login(@Body() body: LoginRequestDto): Promise<AuthResponseDto> {
     return this.cqrsCaller.dispatch(
       new LoginCommand(body.email, body.password),
+      {
+        showCommand: false,
+        showResult: false,
+      },
+    );
+  }
+
+  @Post('refresh')
+  @SwaggerEndpointDecorator({
+    summary: 'Refresh auth tokens',
+    description: 'Generate a new session token and refresh token pair',
+    response: {
+      status: 200,
+      description: 'Tokens refreshed successfully',
+      type: AuthResponseDto,
+    },
+    errors: ['Invalid refresh token'],
+    requireAuth: false,
+  })
+  refresh(@Body() body: RefreshTokenRequestDto): Promise<AuthResponseDto> {
+    return this.cqrsCaller.dispatch(
+      new RefreshTokenCommand(body.refreshToken),
       {
         showCommand: false,
         showResult: false,

@@ -360,17 +360,17 @@ Use cases must depend on domain gateways.
 
 ## Auth Flows
 
-Register and login live as HTTP entry points in the `auth` context.
+Register, login, and refresh token live as HTTP entry points in the `auth` context.
 
 `AuthController` uses `CqrsCaller`.
 
 `AuthController` must not use `CommandBus`, `QueryBus`, or `EventBus` directly.
 
-`RegisterCommand` and `LoginCommand` live in `auth/domain/models/cqrs/commands`.
+`RegisterCommand`, `LoginCommand`, and `RefreshTokenCommand` live in `auth/domain/models/cqrs/commands`.
 
-`RegisterCommandHandler` and `LoginCommandHandler` live in `auth/infrastructure/ui/cqrs-handlers/command-handlers`.
+`RegisterCommandHandler`, `LoginCommandHandler`, and `RefreshTokenCommandHandler` live in `auth/infrastructure/ui/cqrs-handlers/command-handlers`.
 
-`RegisterUseCase` and `LoginUseCase` live in `auth/domain/use-cases`.
+`RegisterUseCase`, `LoginUseCase`, and `RefreshTokenUseCase` live in `auth/domain/use-cases`.
 
 Auth communicates with users through a gateway defined in `auth/domain/models/gateways`.
 
@@ -388,7 +388,9 @@ Register must never persist plain text passwords. Users receives and persists `p
 
 Login must never return `passwordHash`.
 
-Register and login return both a session token and a refresh token.
+Register, login, and refresh token return both a session token and a refresh token.
+
+Refresh token must verify the incoming refresh token with `REFRESH_TOKEN_SECRET` before issuing a new token pair.
 
 Tokens must be generated through the shared `TokenRepository`.
 

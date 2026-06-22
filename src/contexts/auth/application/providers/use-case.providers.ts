@@ -11,6 +11,7 @@ import {
 import {
   AuthTokenConfig,
   LoginUseCase,
+  RefreshTokenUseCase,
   RegisterUseCase,
 } from '@auth/domain/use-cases';
 
@@ -62,6 +63,18 @@ export const UseCaseProviders = [
     ): LoginUseCase =>
       new LoginUseCase(
         usersAuthGateway,
+        tokenRepository,
+        createAuthTokenConfig(configService),
+      ),
+  },
+  {
+    provide: RefreshTokenUseCase,
+    inject: [TokenRepositoryToken, ConfigService],
+    useFactory: (
+      tokenRepository: TokenRepository,
+      configService: ConfigService<EnvironmentVariables, true>,
+    ): RefreshTokenUseCase =>
+      new RefreshTokenUseCase(
         tokenRepository,
         createAuthTokenConfig(configService),
       ),
