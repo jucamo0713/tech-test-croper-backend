@@ -79,7 +79,9 @@ domain -> no outer layer
 
 The application layer integrates providers, handlers, controllers, adapters, gateways, and context configuration.
 
-The domain layer must remain independent from NestJS, infrastructure, application, controllers, handlers, and concrete adapters.
+The domain layer must remain independent from NestJS runtime features, infrastructure, application, controllers, handlers, and concrete adapters.
+
+CQRS is a project-level architectural decision. Domain CQRS contracts may use `type`-only imports from `@nestjs/cqrs`, such as `Command`, `Query`, `IEvent`, `CommandResult`, or `QueryResult`, when those types preserve compile-time inference for command/query results or define cross-context CQRS contracts. These imports must stay type-only and must not introduce NestJS decorators, buses, providers, dependency injection, or other runtime framework usage in domain code.
 
 The infrastructure layer contains technical implementations: controllers, CQRS handlers, DTOs, and driven adapters.
 
@@ -130,7 +132,7 @@ Queries are simple information request objects, for example `GetUserByIdQuery`.
 
 Events are immutable facts in the past tense, for example `UserCreatedDomainEvent`.
 
-CQRS messages must not contain business logic and must not depend on NestJS.
+CQRS messages must not contain business logic. They may use CQRS base types from `@nestjs/cqrs` only as type-level architectural contracts for result inference and command/query/event typing.
 
 Gateway interfaces live in `domain/models/gateways`. They are contracts only and must not contain concrete implementations. Prefer constants or symbols for injection tokens instead of loose strings.
 
@@ -253,4 +255,3 @@ During code review, flag these as issues:
 - Unit tests connect to real databases or services.
 - Tests do not mirror the source context structure.
 - Tests do not use the class and method describe convention.
-

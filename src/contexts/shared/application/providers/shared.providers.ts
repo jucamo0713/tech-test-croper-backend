@@ -3,11 +3,13 @@ import {
   AppLogger,
   HttpExceptionFilter,
   LoggerInterceptor,
+  NestCqrsCaller,
   TimeoutInterceptor,
 } from '@shared/infrastructure/driven-adapters/nestjs';
 
 export const SharedProviders = [
   AppLogger,
+  NestCqrsCaller,
   {
     provide: APP_FILTER,
     useClass: HttpExceptionFilter,

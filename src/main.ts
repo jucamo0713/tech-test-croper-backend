@@ -1,4 +1,4 @@
-import type { LogLevel as NestLogLevel } from '@nestjs/common';
+import { ValidationPipe, type LogLevel as NestLogLevel } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -35,6 +35,13 @@ async function bootstrap() {
 
   appLogger.setLogLevels(LOG_LEVELS_BY_MIN_LEVEL[logLevel]);
   app.useLogger(appLogger);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      forbidNonWhitelisted: true,
+      transform: true,
+      whitelist: true,
+    }),
+  );
   app.setGlobalPrefix(apiPrefix);
 
   if (swaggerEnabled) {

@@ -153,6 +153,8 @@ The domain layer contains the business core. It must remain independent from inf
 
 NestJS dependencies are generally not allowed in domain code, with one explicit exception: domain models and use cases may use NestJS HTTP error classes for error handling, such as `HttpException`, `BadRequestException`, `NotFoundException`, `ConflictException`, `UnauthorizedException`, `ForbiddenException`, and `InternalServerErrorException`.
 
+CQRS is a project-level architectural decision. Domain CQRS contracts may use `type`-only imports from `@nestjs/cqrs`, such as `Command`, `Query`, `IEvent`, `CommandResult`, or `QueryResult`, when those types preserve compile-time inference for command/query results or define cross-context CQRS contracts. These imports must remain type-only and must not introduce runtime NestJS framework usage in domain code.
+
 Do not use NestJS decorators, modules, providers, dependency injection, `ConfigService`, buses, controllers, handlers, interceptors, filters, pipes, or concrete adapters from the domain layer.
 
 ## Domain Models
@@ -184,11 +186,11 @@ Event = reports that something already happened.
 
 ## Commands
 
-Commands live in `domain/models/cqrs/commands`. They are simple objects, contain no business logic, do not depend on NestJS, and are named as imperative actions such as `CreateUserCommand`.
+Commands live in `domain/models/cqrs/commands`. They are simple objects, contain no business logic, and are named as imperative actions such as `CreateUserCommand`. They may extend or use CQRS base types when needed for typed result inference, but only as part of the CQRS contract.
 
 ## Queries
 
-Queries live in `domain/models/cqrs/queries`. They are simple objects, contain no business logic, do not depend on NestJS, and are named as information requests such as `GetUserByIdQuery`.
+Queries live in `domain/models/cqrs/queries`. They are simple objects, contain no business logic, and are named as information requests such as `GetUserByIdQuery`. They may extend or use CQRS base types when needed for typed result inference, but only as part of the CQRS contract.
 
 ## Events
 
@@ -220,7 +222,7 @@ throw new NotFoundException('User not found');
 throw new ConflictException('Email already exists');
 ```
 
-This exception is limited to error classes from `@nestjs/common`. It does not allow using NestJS dependency injection, modules, controllers, handlers, interceptors, pipes, filters, `ConfigService`, CQRS buses, or infrastructure dependencies inside domain code.
+These exceptions are limited to error classes from `@nestjs/common` and type-only CQRS contract imports from `@nestjs/cqrs`. They do not allow using NestJS dependency injection, modules, controllers, handlers, interceptors, pipes, filters, `ConfigService`, CQRS buses, or infrastructure dependencies inside domain code.
 
 Shared infrastructure may also use NestJS filters and interceptors to normalize and log errors globally.
 
@@ -276,7 +278,7 @@ infrastructure -> domain
 domain -> no outer layer
 ```
 
-Exception: domain code may import NestJS HTTP error classes from `@nestjs/common` for error handling only.
+Exceptions: domain code may import NestJS HTTP error classes from `@nestjs/common` for error handling only, and may use type-only CQRS imports from `@nestjs/cqrs` for architectural command/query/event contracts and result inference.
 
 The application layer is the only place responsible for integrating providers, handlers, controllers, and adapters.
 
