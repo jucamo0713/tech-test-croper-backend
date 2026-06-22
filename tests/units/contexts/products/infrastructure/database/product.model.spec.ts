@@ -1,9 +1,9 @@
-import { LangIsoCodeConstants } from '@shared/domain/models/constants';
 import {
   PriceFieldSchemaDefinition,
   TranslatableFieldSchemaDefinition,
 } from '@shared/infrastructure/driven-adapters/database/mongoose';
 import { ProductSchema } from '@products/infrastructure/database';
+import { ProductDatabaseMother } from '../../../../../mothers-and-mocks/contexts/products/infrastructure/database/product-database.mother';
 
 const getPathOptions = (path: string): Record<string, unknown> => {
   const schemaType = ProductSchema.path(path);
@@ -20,41 +20,24 @@ describe('ProductSchema', () => {
     });
 
     it('should define the expected fields', () => {
-      const productIdOptions = getPathOptions('productId');
+      const fieldOptions = ProductDatabaseMother.fieldOptions();
       const nameOptions = getPathOptions('name');
       const descriptionOptions = getPathOptions('description');
       const pricesOptions = getPathOptions('prices');
-      const statusOptions = getPathOptions('status');
 
-      expect(productIdOptions).toMatchObject({
-        type: String,
-        required: true,
-        trim: true,
-      });
+      expect(getPathOptions('productId')).toMatchObject(fieldOptions.productId);
       expect(nameOptions).toMatchObject(TranslatableFieldSchemaDefinition);
       expect(descriptionOptions).toMatchObject({
         ...TranslatableFieldSchemaDefinition,
         required: false,
       });
       expect(pricesOptions).toMatchObject(PriceFieldSchemaDefinition);
-      expect(statusOptions).toMatchObject({
-        type: String,
-        required: false,
-        trim: true,
-      });
+      expect(getPathOptions('status')).toMatchObject(fieldOptions.status);
     });
 
     it('should define the expected indexes', () => {
-      const nameIndexes = Object.values(LangIsoCodeConstants).map(
-        (language) => [{ [`name.${language}`]: 1 }, {}],
-      );
-
       expect(ProductSchema.indexes()).toEqual(
-        expect.arrayContaining([
-          [{ productId: 1 }, { unique: true }],
-          ...nameIndexes,
-          [{ status: 1 }, {}],
-        ]),
+        expect.arrayContaining(ProductDatabaseMother.indexes()),
       );
     });
 

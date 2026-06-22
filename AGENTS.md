@@ -160,6 +160,54 @@ Domain models should be as pure as possible.
 
 Domain models may throw NestJS HTTP errors when validation fails or when a domain invariant cannot be satisfied. They must not use other NestJS framework features.
 
+## Domain Entities
+
+Domain entities live in:
+
+- `src/contexts/users/domain/models/entities`
+- `src/contexts/products/domain/models/entities`
+
+Entity files may use the `.entity.ts` suffix, but exported entity classes must not use the `Entity` suffix.
+
+Correct:
+
+- `User`
+- `Product`
+
+Incorrect:
+
+- `UserEntity`
+- `ProductEntity`
+
+The goal is to keep domain usage readable:
+
+```ts
+const user = new User(props);
+const product = new Product(props);
+```
+
+Entities are pure domain objects.
+
+They must not import:
+
+- NestJS
+- Mongoose
+- infrastructure DTOs
+- database schemas
+- providers
+- controllers
+- handlers
+- adapters
+- use cases
+
+Entities may use value objects from the domain model.
+
+Product entities must reuse existing value objects or domain types for multilanguage fields and multi-price fields.
+
+Entities should expose clear constructors and getters.
+
+Entities should not contain full use-case logic.
+
 ## Domain CQRS inside Models
 
 CQRS messages live inside `domain/models/cqrs`:
@@ -399,6 +447,15 @@ Controller -> Mongoose Model
 Handler -> Repository concreto directamente
 Handler -> Adapter concreto directamente
 Handler -> Mongoose Model
+Entity -> Mongoose
+Entity -> NestJS
+Entity -> Infrastructure DTO
+Entity -> Database Schema
+Entity -> Database Provider
+Entity -> Controller
+Entity -> Handler
+Entity -> Adapter
+Entity -> UseCase
 UseCase -> NestJS framework features, except HTTP error classes
 UseCase -> Controller
 UseCase -> Handler
@@ -414,6 +471,11 @@ DTO usado como entidad de dominio
 Gateway con implementación concreta dentro de domain/models/gateways
 Cada contexto importando ConfigModule directamente sin pasar por SharedModule
 Cada contexto importando CqrsModule directamente sin pasar por SharedModule
+Class names ending in Entity for domain entities
+UserEntity
+ProductEntity
+UserEntityProps
+ProductEntityProps
 Crear adapters de MongoDB en esta iteración
 Crear repositories concretos de MongoDB en esta iteración
 Duplicating existing multilanguage value objects

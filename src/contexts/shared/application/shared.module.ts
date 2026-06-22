@@ -19,8 +19,10 @@ import { envValidationSchema } from './config';
 import {
   AsyncContextMiddleware,
   DatabaseModule,
+  NestCqrsCaller,
   RequestIdMiddleware,
 } from '@shared/infrastructure/driven-adapters';
+import { CqrsCallerRepositoryToken } from '@shared/domain/models/gateways';
 
 @Global()
 @Module({
@@ -45,7 +47,13 @@ import {
     ...QueryHandlers,
     ...EventHandlers,
   ],
-  exports: [ConfigModule, CqrsModule, DatabaseModule],
+  exports: [
+    ConfigModule,
+    CqrsModule,
+    DatabaseModule,
+    NestCqrsCaller,
+    CqrsCallerRepositoryToken,
+  ],
 })
 export class SharedModule {
   configure(consumer: MiddlewareConsumer) {

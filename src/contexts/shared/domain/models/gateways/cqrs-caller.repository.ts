@@ -1,5 +1,7 @@
 import type { Command, IEvent, Query } from '@nestjs/cqrs';
 
+export const CqrsCallerRepositoryToken = Symbol('CqrsCallerRepository');
+
 /**
  * Interface representing a CQRS (Command Query Responsibility Segregation) caller,
  * providing methods for dispatching commands, querying, and emitting events.

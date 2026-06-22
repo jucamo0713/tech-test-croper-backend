@@ -4,9 +4,8 @@ import {
   DatabaseUserModelProvider,
   UserSchema,
 } from '@users/infrastructure/database';
-import { UserDto } from '@users/infrastructure/dtos';
 import { DatabaseConstants } from '@shared/infrastructure/driven-adapters/database';
-import { Connection, Model } from 'mongoose';
+import { UserDatabaseMother } from '../../../../../mothers-and-mocks/contexts/users/infrastructure/database/user-database.mother';
 
 describe('DatabaseUserModelProvider', () => {
   describe('configuration', () => {
@@ -19,11 +18,8 @@ describe('DatabaseUserModelProvider', () => {
 
   describe('useFactory', () => {
     it('should register the user model using the provided connection', () => {
-      const model = {} as Model<UserDto>;
-      const modelFactory = jest.fn((): Model<UserDto> => model);
-      const connection = {
-        model: modelFactory,
-      } as unknown as Connection;
+      const { connection, model, modelFactory } =
+        UserDatabaseMother.connection();
 
       const result = DatabaseUserModelProvider.useFactory?.(connection);
 

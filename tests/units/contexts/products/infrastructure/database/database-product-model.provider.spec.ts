@@ -4,9 +4,8 @@ import {
   DatabaseProductModelProvider,
   ProductSchema,
 } from '@products/infrastructure/database';
-import { ProductDto } from '@products/infrastructure/dtos';
 import { DatabaseConstants } from '@shared/infrastructure/driven-adapters/database';
-import { Connection, Model } from 'mongoose';
+import { ProductDatabaseMother } from '../../../../../mothers-and-mocks/contexts/products/infrastructure/database/product-database.mother';
 
 describe('DatabaseProductModelProvider', () => {
   describe('configuration', () => {
@@ -19,11 +18,8 @@ describe('DatabaseProductModelProvider', () => {
 
   describe('useFactory', () => {
     it('should register the product model using the provided connection', () => {
-      const model = {} as Model<ProductDto>;
-      const modelFactory = jest.fn((): Model<ProductDto> => model);
-      const connection = {
-        model: modelFactory,
-      } as unknown as Connection;
+      const { connection, model, modelFactory } =
+        ProductDatabaseMother.connection();
 
       const result = DatabaseProductModelProvider.useFactory?.(connection);
 

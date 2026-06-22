@@ -1,4 +1,5 @@
 import { UserSchema } from '@users/infrastructure/database';
+import { UserDatabaseMother } from '../../../../../mothers-and-mocks/contexts/users/infrastructure/database/user-database.mother';
 
 const getPathOptions = (path: string): Record<string, unknown> => {
   const schemaType = UserSchema.path(path);
@@ -15,41 +16,17 @@ describe('UserSchema', () => {
     });
 
     it('should define the expected fields', () => {
-      const userIdOptions = getPathOptions('userId');
-      const emailOptions = getPathOptions('email');
-      const passwordOptions = getPathOptions('password');
-      const statusOptions = getPathOptions('status');
+      const fieldOptions = UserDatabaseMother.fieldOptions();
 
-      expect(userIdOptions).toMatchObject({
-        type: String,
-        required: true,
-        trim: true,
-      });
-      expect(emailOptions).toMatchObject({
-        type: String,
-        required: true,
-        lowercase: true,
-        trim: true,
-      });
-      expect(passwordOptions).toMatchObject({
-        type: String,
-        required: true,
-        select: false,
-      });
-      expect(statusOptions).toMatchObject({
-        type: String,
-        required: false,
-        trim: true,
-      });
+      expect(getPathOptions('userId')).toMatchObject(fieldOptions.userId);
+      expect(getPathOptions('email')).toMatchObject(fieldOptions.email);
+      expect(getPathOptions('password')).toMatchObject(fieldOptions.password);
+      expect(getPathOptions('status')).toMatchObject(fieldOptions.status);
     });
 
     it('should define the expected indexes', () => {
       expect(UserSchema.indexes()).toEqual(
-        expect.arrayContaining([
-          [{ userId: 1 }, { unique: true }],
-          [{ email: 1 }, { unique: true }],
-          [{ status: 1 }, {}],
-        ]),
+        expect.arrayContaining(UserDatabaseMother.indexes()),
       );
     });
   });
