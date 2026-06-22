@@ -33,6 +33,11 @@ async function bootstrap() {
     infer: true,
   });
 
+  app.enableCors({
+    allowedHeaders: '*',
+    methods: '*',
+    origin: '*',
+  });
   appLogger.setLogLevels(LOG_LEVELS_BY_MIN_LEVEL[logLevel]);
   app.useLogger(appLogger);
   app.useGlobalPipes(
